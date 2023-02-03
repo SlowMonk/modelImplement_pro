@@ -24,7 +24,7 @@ from torchsummary import summary
 import time
 import copy
 
-
+#load_data
 def load_data():
     # if not exists the path, make the directory
     path2data = '/data/emocog_data/data/stl'
