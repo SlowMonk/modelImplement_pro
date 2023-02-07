@@ -38,9 +38,21 @@ def load_data():
 
     print(len(train_ds))
     print(len(val_ds))
+    print(np.array(train_ds)[0][0].shape)
+
+    return train_ds, val_ds
+
+def calculate_normalize(train_ds, val_ds):
+    
+    # To normalize the dataset, calculate the mean and std
+    train_meanRGB = [np.mean(x.numpy(), axis=(1,2)) for x, _ in train_ds]
+    train_stdRGB = [np.std(x.numpy(), axis=(1,2)) for x, _ in train_ds]
+    print(f'train_meanRGB->{train_meanRGB}')
 
 def main():
-    load_data()
+    train_ds, val_ds = load_data()
+    calculate_normalize(train_ds, val_ds)
+
 
 if __name__ == "__main__":
     main()
