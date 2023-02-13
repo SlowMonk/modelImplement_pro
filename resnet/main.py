@@ -24,6 +24,7 @@ from torchsummary import summary
 import time
 import copy
 
+
 #load_data
 def load_data():
     # if not exists the path, make the directory
@@ -41,6 +42,7 @@ def load_data():
     #print(np.array(train_ds)[0][0].shape)
 
     return train_ds, val_ds
+
 
 def calculate_normalize(train_ds, val_ds):
     
@@ -73,9 +75,37 @@ def calculate_normalize(train_ds, val_ds):
     print(train_meanR, train_meanG, train_meanB)
     print(val_meanR, val_meanG, val_meanB)
 
+    return train_meanR, train_meanG, train_meanB, train_stdR, train_stdG, train_stdB
+
 def main():
     train_ds, val_ds = load_data()
-    calculate_normalize(train_ds, val_ds)
+    train_meanR, train_meanG, train_meanB, train_stdR, train_stdG, train_stdB = calculate_normalize(train_ds, val_ds)
+
+    # define the image transformation
+    # using FiveCrop, normalize, horizontal reflection
+    train_transformer = transforms.Compose([
+                        transforms.Resize(256),
+                        transforms.FiveCrop(224),
+                        transforms.Lambda(lambda crops: torch.stack([transforms.ToTensor()(crop) for crop in crops])),
+                        transforms.Normalize([train_meanR, train_meanG, train_meanB], [train_stdR, train_stdG, train_stdB]),
+    ])
+
+    # test_transformer = transforms.Compose([
+    #                     transforms.ToTensor(),
+    #                     transforms.Resize(224),
+    #                     transforms.Normalize([train_meanR, train_meanG, train_meanB], [train_stdR, train_stdG, train_stdB]),
+    # ])
+
+    # apply transformation
+    train_ds.transform = train_transformer
+    val_ds.transform = train_transformer
+
+    # create dataloader
+    train_dl = DataLoader(train_ds, batch_size=4, shuffle=True)
+    val_dl = DataLoader(val_ds, batch_size=4, shuffle=True)
+
+    print(f'train_dl->{len(train_dl)}, val_dl->{len(val_dl)}')
+
 
 
 if __name__ == "__main__":
